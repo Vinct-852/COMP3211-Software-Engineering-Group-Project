@@ -30,15 +30,13 @@
 
             // Check if the property is owned by someone
             if (owner == null) {  // Case 1: The property is unowned
-                System.out.println("Do you wish to buy the " + name + " property for " + price + "? (Y/N)");
-                System.out.println("Property Price: " + price);
-
-                String response = myObj.nextLine();
+                System.out.print("\nDo you wish to buy the " + name + " property for " + price + "? (Y/N): ");
+                String response = myObj.nextLine().toUpperCase();;
 
                 // Check for invalid input
                 while (!response.equals("Y") && !response.equals("N")) {
                     System.out.println("Invalid input! Please try again.");
-                    response = myObj.nextLine();
+                    response = myObj.nextLine().toUpperCase();;
                 }
 
                 // Process the player's decision to buy

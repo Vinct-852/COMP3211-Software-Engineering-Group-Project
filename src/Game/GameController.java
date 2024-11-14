@@ -64,6 +64,15 @@ public class GameController {
 
         if(function == 2) {
             // start a new game with a custom game board
+            int res = -1;
+            while(res != 0) {
+                System.out.print("Please enter custom game board file path: ");
+                String filePath = scanner.next();
+                res = this.game.getGameBoardController().loadGameBd(filePath);
+                if(res != 0) {
+                    System.out.printf("Load custom game board fail! %s%n", this.game.getGameBoardController().errorMsg);
+                }
+            }
             System.out.println("Please enter custom game board file path");
             filePath = scanner.next();
         }
@@ -240,6 +249,7 @@ public class GameController {
     public int loadGameData(String filePath) {
         System.out.printf("Loading the game from %s%n", filePath);
 
+        System.out.print("\nReading GameBoard....\n\n");
         this.game.getGameBoardController().loadGameBd(filePath);
 
         System.out.print("\nReading Players....\n");
@@ -282,7 +292,7 @@ public class GameController {
                         int turnsInJail = Integer.parseInt(getTagValue("TurnsInJail", playerElement));
 
                         // Print player information
-                        System.out.println("\nPlayer " + (i + 1) + ":");
+                        System.out.println("\u001B[32m\nPlayer " + (i + 1) + ":\u001B[0m");
                         System.out.println("Name: " + name);
                         System.out.println("Balance: " + balance);
                         System.out.println("Current Game Board Position: " + currGameBdPosition);
