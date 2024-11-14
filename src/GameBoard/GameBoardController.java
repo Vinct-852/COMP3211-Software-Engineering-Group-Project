@@ -10,7 +10,6 @@ import org.w3c.dom.Element;
 import java.io.File;
 
 
-
 public class GameBoardController {
     private GameBoard gameBoard;
     private GameBoardView gameBoardView;
@@ -35,7 +34,7 @@ public class GameBoardController {
         if(filePath.isEmpty() || !fXmlFile.exists())
         {
             //Default game board for initialization
-            fXmlFile = new File(System.getProperty("user.dir") + "defaultGameBoard.xml");
+            fXmlFile = new File(System.getProperty("user.dir") + "/defaultGameBoard.xml");
         }
 
         System.out.println("Loading game board from " + filePath + "...");
@@ -126,8 +125,8 @@ public class GameBoardController {
                         throw new IllegalArgumentException(position + " has an unknown square type: " + squareType);
                 }
             }
-
         }catch (Exception e) {
+            this.errorMsg = e.getMessage();
             return -1;
         }
 
@@ -149,5 +148,6 @@ public class GameBoardController {
     public void setGameBoardView(GameBoardView gameBoardView) {
         this.gameBoardView = gameBoardView;
     }
+
 }
 
