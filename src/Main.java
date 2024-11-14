@@ -1,6 +1,6 @@
 import Game.GameController;
 import java.io.File;
-import Player.player
+import Player.Player;
 import java.util.Scanner;
 
 public class Main {

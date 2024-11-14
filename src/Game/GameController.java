@@ -67,8 +67,8 @@ public class GameController {
             int res = -1;
             while(res != 0) {
                 System.out.print("Please enter custom game board file path: ");
-                String filePath = scanner.next();
-                res = this.game.getGameBoardController().loadGameBd(filePath);
+                String path = scanner.next();
+                res = this.game.getGameBoardController().loadGameBd(path);
                 if(res != 0) {
                     System.out.printf("Load custom game board fail! %s%n", this.game.getGameBoardController().errorMsg);
                 }
