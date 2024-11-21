@@ -55,30 +55,41 @@ public class GameController {
         Scanner scanner = new Scanner(System.in);
         int function = 0;
 
-        while(function != 1 && function != 2){
+        while (true) {
             System.out.println("1. using default game board");
             System.out.println("2. import custom game board");
-            System.out.println("Please enter ...");
-            function = scanner.nextInt();
-            if(function != 1 && function != 2) {
-                System.out.println("Invalid command!");
+            System.out.print("\u001B[36mChoice: \u001B[0m");
+
+            if (scanner.hasNextInt()) {
+                function = scanner.nextInt();
+                if (function == 1 || function == 2) {
+                    break; // Valid input, exit the loop
+                } else {
+                    System.out.println("\n\u001B[31mInvalid input. Please enter a valid number (1 or 2).\u001B[0m\n");
+                }
+            } else {
+                System.out.println("\n\u001B[31mInvalid input. Please enter a number.\u001B[0m\n");
+                scanner.next(); // Consume the invalid input
             }
         }
 
-        String filePath = ""; // default game board
+        String filePath = System.getProperty("user.dir") + "/defaultGameBoard.xml"; // default game board
 
         if(function == 2) {
-            // start a new game with a custom game board
-            System.out.println("Please enter custom game board file path");
-            filePath = scanner.next();
+            int res = -1;
+            while (res != 0) {
+                System.out.print("Please input the game data file path: ");
+                String path = scanner.next();
+                res = this.game.getGameBoardController().loadGameBd(path);
+                if (res != 0) {
+                    System.out.println("\n\u001B[31mThe specified file does not exist or is not a valid file. Please try again. "
+                            + this.game.getGameBoardController().errorMsg + "\u001B[0m\n");
+                }
+            }
+            return;
         }
 
-        int res = -1;
-        res = this.game.getGameBoardController().loadGameBd(filePath);
-        if(res != 0) {
-            System.out.printf("Load custom game board fail! %s%n", this.game.getGameBoardController().errorMsg);
-
-        }
+        this.game.getGameBoardController().loadGameBd(filePath);
     }
 
     public void initializeGamePlayer() {
@@ -88,15 +99,23 @@ public class GameController {
         // Loop until a valid number of players is entered
         while (true) {
             System.out.print("Enter number of players (" + Game.MIN_PLAYER_NUMBER + " to " + Game.MAX_PLAYER_NUMBER + "): ");
-            numPlayers = scanner.nextInt();
-            scanner.nextLine();
 
-            if (numPlayers >= Game.MIN_PLAYER_NUMBER && numPlayers <= Game.MAX_PLAYER_NUMBER) {
-                break; // Exit the loop if the input is valid
+            if (scanner.hasNextInt()) {
+                numPlayers = scanner.nextInt();
+                scanner.nextLine(); // Consume the remaining newline
+
+                if (numPlayers >= Game.MIN_PLAYER_NUMBER && numPlayers <= Game.MAX_PLAYER_NUMBER) {
+                    break; // Exit the loop if the input is valid
+                } else {
+                    System.out.println("\n\u001B[31mInvalid number of players. Please enter a number between "
+                            + Game.MIN_PLAYER_NUMBER + " and " + Game.MAX_PLAYER_NUMBER + ".\u001B[0m\n");
+                }
             } else {
-                System.out.println("Invalid number of players. Please try again.");
+                System.out.println("\n\u001B[31mInvalid input. Please enter a valid number.\u001B[0m\n");
+                scanner.next(); // Consume the invalid input
             }
         }
+
 
         System.out.println("Number of players set to: " + numPlayers);
 
@@ -136,11 +155,15 @@ public class GameController {
         return "Unknown"; // Fallback for unknown square types
     }
 
-
     /*
     *   game logic
     */
     public void startGame() {
+
+        if (game.playerList.peek() == null) {
+            throw new IllegalStateException("\u001B[31m\n\nPlayer list is empty. Cannot proceed with the game.\u001B[0m\n");
+        }
+
         Scanner scanner = new Scanner(System.in);
 
         //The system shall place all player tokens on the "Go" square at the start of the game.
@@ -161,9 +184,9 @@ public class GameController {
         while(game.currRound <= Game.MAX_ROUNDS && game.playerList.size()>1) {
             for (int i=0; i<game.playerList.size(); i++){
 
-                System.out.println("********************************************");
+                System.out.println("********************************************\n");
                 System.out.printf("Round %d: %s's turn.\n", game.currRound, game.playerList.peek().getPlayer().getName());
-                game.getGameBoardController().getGameBoardView().displayGameBD();
+                //game.getGameBoardController().getGameBoardView().displayGameBD(this.game.getGameBoardController().getGameBoard().filePath);
                 gameView.printAllPlayerPosition(game.playerList);
 
                 PlayerController playerController = game.playerList.poll();
@@ -176,38 +199,48 @@ public class GameController {
                     System.out.println("1. Roll dice");
                     System.out.println("2. Query the next player");
                     System.out.println("3. Display player(s) status");
-                    System.out.println("4. Display game board");
-                    System.out.println("5. Save game");
-                    System.out.print("Please enter your choice (1-5): ");
+                    System.out.println("4. Display my status");
+                    System.out.println("5. Display game board and players' position");
+                    System.out.println("6. Save game");
+                    System.out.print("Please enter your choice (1-6): ");
 
-                    // Read user input
-                    int function = scanner.nextInt();
+                    // Read the input as a string
+                    String input = scanner.nextLine().trim();
 
-                    // Validate user input
-                    if (function < 1 || function > 5) {
-                        System.out.println("Invalid command! Please enter a number between 1 and 5.");
-                    } else {
-                        // Handle valid commands
-                        switch (function) {
-                            case 1:
-                                threwDice = true; // Assuming this indicates that dice have been rolled
-                                break;
-                            case 2:
-                                System.out.println("\u001B[32mThe next player is " + this.game.playerList.peek().getPlayer().getName() + "\u001B[0m");
-                                break;
-                            case 3:
-                                System.out.println("Displaying player(s) status...");
-                                displayPlyerStatus();
-                                break;
-                            case 4:
-                                game.getGameBoardController().getGameBoardView().displayGameBD();
-                                break;
-                            case 5:
-                                System.out.println("Saving game...");
-                                game.playerList.add(playerController);
-                                saveGameData();
-                                return;
-                        }
+                    // Combine validation checks
+                    if (input.isEmpty() || !input.matches("\\d+") || (Integer.parseInt(input) < 1 || Integer.parseInt(input) > 6)) {
+                        System.out.println("\n\u001B[31mInvalid input! Please enter a valid number between 1 and 6.\u001B[0m\n");
+                        continue;
+                    }
+
+                    // If input is valid, convert it to an integer
+                    int function = Integer.parseInt(input);
+
+                    // Handle valid commands
+                    switch (function) {
+                        case 1:
+                            threwDice = true; // Assuming this indicates that dice have been rolled
+                            break;
+                        case 2:
+                            System.out.println("\u001B[32mThe next player is " + this.game.playerList.peek().getPlayer().getName() + "\u001B[0m");
+                            break;
+                        case 3:
+                            System.out.println("Displaying player(s) status...");
+                            displayPlyerStatus(playerController);
+                            break;
+                        case 4:
+                            playerController.getPlayerView().displayStatus(playerController.getPlayer());
+                            break;
+                        case 5:
+                            game.getGameBoardController().getGameBoardView().displayGameBD(this.game.getGameBoardController().getGameBoard().filePath);
+                            gameView.printAllPlayerPosition(game.playerList);
+                            playerController.getPlayerView().printPlayerPosition(playerController.getPlayer());
+                            break;
+                        case 6:
+                            System.out.println("Saving game...");
+                            game.playerList.add(playerController);
+                            saveGameData();
+                            return;
                     }
                 }
 
@@ -253,8 +286,19 @@ public class GameController {
                     square.access(playerController.getPlayer());
                 }
 
-                if(playerController.getPlayer().getBalance() > 0){
+                if (playerController.getPlayer().getBalance() > 0) {
                     game.playerList.add(playerController);
+                } else {
+                    // Remove all properties owned by the player
+                    List<Property> propertiesToRemove = new ArrayList<>(playerController.getPlayer().getOwnedProperties());
+
+                    for (Property property : propertiesToRemove) {
+                        property.setOwner(null); // Reset ownership of the property
+                        playerController.getPlayer().removeProperty(property); // Remove property from the player's list
+                    }
+
+                    System.out.println("\u001B[31m" + playerController.getPlayer().getName() +
+                            " has been removed from the game and their properties are now unowned.\u001B[0m");
                 }
             }
 
@@ -289,6 +333,11 @@ public class GameController {
             // MonopolyGame element
             Element monopolyGameElement = doc.createElement("MonopolyGame");
             rootElement.appendChild(monopolyGameElement);
+
+            // Round element
+            Element currRoundElement = doc.createElement("CurrRound");
+            currRoundElement.appendChild(doc.createTextNode(String.valueOf(this.game.currRound)));
+            monopolyGameElement.appendChild(currRoundElement);
 
             // PlayerList element
             Element playerListElement = doc.createElement("PlayerList");
@@ -374,18 +423,15 @@ public class GameController {
         }
     }
 
-
-
-
-
-    private void displayPlyerStatus() {
+    public void displayPlyerStatus(PlayerController playerController) {
         Scanner scanner = new Scanner(System.in); // Ensure you have a scanner instance
-        System.out.println("Enter the player name to view their status, or enter '*' to see all players' info:");
+        System.out.println("\u001B[32mEnter the player name to view their status, or enter '*' to see all players' info:\u001B[0m");
 
         String input = scanner.nextLine(); // Read user input
         boolean playerFound = true;
 
         if (input.equals("*")) {
+            playerController.getPlayerView().displayStatus(playerController.getPlayer());
             // Display all players' information
             for(var player : game.playerList) {
                 player.getPlayerView().displayStatus(player.getPlayer());
@@ -399,6 +445,10 @@ public class GameController {
                     playerFound = true;
                     player.getPlayerView().displayStatus(player.getPlayer());
                 }
+            }
+            if(playerController.getPlayer().getName().equals(input)) {
+                playerFound = true;
+                playerController.getPlayerView().displayStatus(playerController.getPlayer());
             }
         }
 
@@ -439,7 +489,7 @@ public class GameController {
 
         this.game.getGameBoardController().loadGameBd(filePath);
 
-        System.out.print("\nReading Players....\n");
+        System.out.print("\nReading Players and Properties...\n");
         try {
             File xmlFile = new File(filePath);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -448,10 +498,18 @@ public class GameController {
 
             doc.getDocumentElement().normalize();
 
-            NodeList playerNodes = doc.getElementsByTagName("Player");
+            // round handling
+            Node currRoundNode = doc.getElementsByTagName("CurrRound").item(0);
+            if (currRoundNode == null || currRoundNode.getTextContent().isEmpty()) {
+                System.err.println("Error: CurrRound is not defined.");
+                return -1;
+            }
+            this.game.currRound = Integer.parseInt(currRoundNode.getTextContent());
 
+            // players handling
+            // Parse players
+            NodeList playerNodes = doc.getElementsByTagName("Player");
             if (playerNodes.getLength() > 0) {
-                // Iterate through all Player nodes
                 for (int i = 0; i < playerNodes.getLength(); i++) {
                     Node playerNode = playerNodes.item(i);
 
@@ -462,7 +520,7 @@ public class GameController {
                         String balanceStr = getTagValue("Balance", playerElement);
 
                         if (name == null || name.isEmpty()) {
-                            System.err.println("Error: Missing or empty player name for player at index " + i);
+                            System.out.println("\u001B[31mError: Missing or empty player name for player at index " + i + "\u001B[0m");
                             return -1;
                         }
 
@@ -470,21 +528,13 @@ public class GameController {
                         try {
                             balance = Integer.parseInt(balanceStr);
                         } catch (NumberFormatException e) {
-                            System.err.println("Error: Invalid balance value for player at index " + i + ". Must be an integer.");
+                            System.out.println("\u001B[31mError: Invalid balance value for player at index " + i + ". Must be an integer.\u001B[0m");
                             return -1;
                         }
 
                         int currGameBdPosition = Integer.parseInt(getTagValue("CurrentGameBoardPosition", playerElement));
                         boolean inJail = Boolean.parseBoolean(getTagValue("InJail", playerElement));
                         int turnsInJail = Integer.parseInt(getTagValue("TurnsInJail", playerElement));
-
-                        // Print player information
-                        System.out.println("\u001B[32m\nPlayer " + (i + 1) + ":\u001B[0m");
-                        System.out.println("Name: " + name);
-                        System.out.println("Balance: " + balance);
-                        System.out.println("Current Game Board Position: " + currGameBdPosition);
-                        System.out.println("In Jail: " + inJail);
-                        System.out.println("Turns in Jail: " + turnsInJail);
 
                         // Create player object
                         Player player = new Player(name);
@@ -493,19 +543,69 @@ public class GameController {
                         player.setInJail(inJail);
                         player.setTurnsInJail(turnsInJail);
 
+                        // Add player to the player list
                         game.playerList.add(new PlayerController(player));
-
-
                     }
                 }
             } else {
-                System.err.println("No player nodes found in the XML.");
-                return -1;
+                return -1; // No players found
             }
+
+            // Parse properties
+            // Assign properties to players based on the game board and owner name
+            NodeList squareNodes = doc.getElementsByTagName("squares");
+            for (int i = 0; i < squareNodes.getLength(); i++) {
+                Node squareNode = squareNodes.item(i);
+
+                if (squareNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element squareElement = (Element) squareNode;
+
+                    if ("Property".equals(squareElement.getAttribute("type"))) {
+                        String name = getTagValue("name", squareElement);
+                        String ownerName = getTagValue("owner", squareElement);
+
+                        // Retrieve the existing property from the game board
+                        for (Square square : game.getGameBoardController().getGameBoard().getSquareList()) {
+                            if (square instanceof Property) {
+                                Property property = (Property) square;
+                                if (property.getName().equals(name)) {
+                                    // Assign ownership if an owner is specified
+                                    if (ownerName != null && !ownerName.isEmpty()) {
+                                        for (PlayerController pc : game.playerList) {
+                                            Player player = pc.getPlayer();
+                                            if (player.getName().equals(ownerName)) {
+                                                property.setOwner(player);
+                                                player.addProperty(property); // Add the existing property to the player's owned list
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    break; // Stop searching once the property is found
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Display all players' information
+            System.out.println("\nDisplaying all players' information:");
+            for (PlayerController pc : game.playerList) {
+                Player player = pc.getPlayer();
+                System.out.println("\u001B[32m\nPlayer: " + player.getName() + "\u001B[0m");
+                System.out.println("Balance: " + player.getBalance());
+                System.out.println("Current Game Board Position: " + player.getCurrGameBdPosition());
+                System.out.println("In Jail: " + player.isInJail());
+                System.out.println("Turns in Jail: " + player.getTurnsInJail());
+                System.out.println("Owned Properties: " + player.getOwnedList());
+            }
+
         } catch (Exception e) {
+            System.err.println("Error: Failed to load game data. " + e.getMessage());
             e.printStackTrace();
             return -1;
         }
+
         this.isNewGame = false;
         return 0; // Success
     }

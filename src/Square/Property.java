@@ -35,8 +35,9 @@ public class Property extends Square {
 
             // Check for invalid input
             while (!response.equals("Y") && !response.equals("N")) {
-                System.out.println("Invalid input! Please try again.");
-                response = myObj.nextLine().toUpperCase();;
+                System.out.println("\n\u001B[31mInvalid input! Please try again.\u001B[0m\n");
+                System.out.print("Choice (Y/N): ");
+                response = myObj.nextLine().toUpperCase();
             }
 
             // Process the player's decision to buy
@@ -44,6 +45,7 @@ public class Property extends Square {
                 player.setBalance(player.getBalance() - price);  // Deduct the price from the player's balance
                 owner = player;  // Set the owner to the current player
                 System.out.println("Congratulations! You now own " + name + ".");
+                player.addProperty(this);
             } else {
                 System.out.println("You chose not to buy " + name + ".");
             }
