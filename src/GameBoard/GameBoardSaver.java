@@ -54,7 +54,7 @@ public class GameBoardSaver {
         scanner.close();
     }
 
-    private static boolean isValidXmlFile(File file) {
+    public static boolean isValidXmlFile(File file) {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -163,11 +163,11 @@ public class GameBoardSaver {
         }
     }
 
-    private static String createNewFileName(String originalFileName) {
+    public static String createNewFileName(String originalFileName) {
         return originalFileName.replace(".xml", "_" + saveCount++ + ".xml");
     }
 
-    private static int getUserInput(Scanner scanner, String prompt) {
+    public static int getUserInput(Scanner scanner, String prompt) {
         while (true) {
             System.out.print(prompt);
             try {
@@ -179,7 +179,7 @@ public class GameBoardSaver {
         }
     }
 
-    private static int getPositionInput(Scanner scanner, String prompt) {
+    public static int getPositionInput(Scanner scanner, String prompt) {
         while (true) {
             System.out.print(prompt);
             try {
@@ -191,7 +191,7 @@ public class GameBoardSaver {
         }
     }
 
-    private static void updateSquareTypeMenu(Document doc, Scanner scanner) {
+    public static void updateSquareTypeMenu(Document doc, Scanner scanner) {
         System.out.println("Select a new type for the square:");
         System.out.println("1. Property");
         System.out.println("2. Income Tax");
@@ -280,7 +280,7 @@ public class GameBoardSaver {
         }
     }
 
-    private static Element getOrCreateElement(Element parent, String tagName) {
+    public static Element getOrCreateElement(Element parent, String tagName) {
         NodeList nodeList = parent.getElementsByTagName(tagName);
         if (nodeList.getLength() > 0) {
             return (Element) nodeList.item(0);
@@ -341,7 +341,7 @@ public class GameBoardSaver {
         }
     }
 
-    private static void reorderSquares(Document doc) {
+    public static void reorderSquares(Document doc) {
         NodeList squares = doc.getElementsByTagName("squares");
         List<Element> squareList = new ArrayList<>();
 
@@ -369,7 +369,7 @@ public class GameBoardSaver {
         }
     }
 
-    private static void swapSquareContents(Element square1, Element square2) {
+    public static void swapSquareContents(Element square1, Element square2) {
         // Swap attributes
         String tempPosition = square1.getAttribute("position");
         square1.setAttribute("position", square2.getAttribute("position"));
@@ -386,7 +386,7 @@ public class GameBoardSaver {
         swapChildElement(square1, square2, "owner");
     }
 
-    private static void swapChildElement(Element square1, Element square2, String tagName) {
+    public static void swapChildElement(Element square1, Element square2, String tagName) {
         NodeList list1 = square1.getElementsByTagName(tagName);
         NodeList list2 = square2.getElementsByTagName(tagName);
 
@@ -507,7 +507,7 @@ public class GameBoardSaver {
         return true; // Validation successful
     }
 
-    private static boolean hasElement(Element parent, String tagName) {
+    public static boolean hasElement(Element parent, String tagName) {
         NodeList nodeList = parent.getElementsByTagName(tagName);
         return nodeList.getLength() > 0 && nodeList.item(0).getTextContent() != null && !nodeList.item(0).getTextContent().trim().isEmpty();
     }
@@ -590,7 +590,7 @@ public class GameBoardSaver {
         }
     }
 
-    private static String generateUniqueFilePath(String baseFileName, String fileExtension) {
+    public static String generateUniqueFilePath(String baseFileName, String fileExtension) {
         int count = 1;
         String filePath = baseFileName + fileExtension;
 
